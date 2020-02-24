@@ -6,7 +6,6 @@ import pickle
 import numpy as np
 import nltk
 from PIL import Image
-from build_vocab import Vocabulary
 from pycocotools.coco import COCO
 
 
@@ -39,7 +38,8 @@ class CocoDataset(data.Dataset):
         image = Image.open(os.path.join(self.root, path)).convert('RGB')
         if self.transform is not None:
             image = self.transform(image)
-
+        image = transforms.ToTensor()(image)
+        
         # Convert caption (string) to word ids.
         tokens = nltk.tokenize.word_tokenize(str(caption).lower())
         caption = []
