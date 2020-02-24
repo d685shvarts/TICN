@@ -30,7 +30,7 @@ class LSTM(nn.Module):
     def forward(self, X=None, imgs=None, hidden_state=None, cell_state=None):
         '''
         X -- (batch_size, sequence_length, embedding_size)
-        imgs -- not None with dimension (batch_size, img_height, img_width)
+        imgs -- (batch_size, img_height, img_width)
         hidden_state -- (hidden_size)
         cell_state -- (cell_size)
         
