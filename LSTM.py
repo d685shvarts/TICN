@@ -24,8 +24,15 @@ class LSTM(nn.Module):
         
         
         # Decoder LSTM
-        self.lstm = nn.LSTM(input_size=cfg['embedding_size'], hidden_size=cfg['embedding_size'], num_layers=cfg['num_layers'], batch_first=True, dropout=cfg['dropout'], bidirectional=cfg['bidirectional'])
-
+        self.lstm = nn.LSTM(input_size=cfg['embedding_size'], hidden_size=cfg['hidden_size'],
+                            num_layers=cfg['num_layers'], batch_first=True,
+                            dropout=cfg['dropout'], bidirectional=cfg['bidirectional'])
+        
+        self.lstm_out = nn.Linear(cfg['hidden_size'], cfg['vocab_size'])
+        self.lstm_batch_norm = nn.BatchNorm1d(cfg['hidden_size'])
+        
+        self.embed = nn.Embedding(num_embeddings=cfg["vocab_size"], embedding_dim=cfg["embedding_size"])
+        
 
     def forward(self, X=None, imgs=None, hidden_state=None, cell_state=None):
         '''
@@ -56,8 +63,17 @@ class LSTM(nn.Module):
             # Create feature vector: (batch_size, img_height, img_width) --> (batch_size, embedding_size)
             X0 = self.resnetBN(self.relu(self.resnet(imgs)))
 
+
             # Make this output into 3D (batch_size, embedding_size) --> (batch_size, 1, embedding_size)
             X0 = X0.view((X0.shape[0], 1, X0.shape[-1]))
+            
+            
+
+        # Apply embedding on the input
+        if X is not None:
+            X = X.long()
+            X = self.embed(X)
+
 
         # For generation, X can be None in the first forward call if we want to pass in X1, X2, X3
         # in separate subsequent calls
@@ -78,6 +94,8 @@ class LSTM(nn.Module):
         else:
             # LSTM the sequence
             Y, (hidden_state, cell_state) = self.lstm(X)
+            
+        Y = self.lstm_out(Y)
 
         return Y, (hidden_state, cell_state)
                         

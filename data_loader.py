@@ -31,7 +31,10 @@ class CocoDataset(data.Dataset):
         coco = self.coco
         vocab = self.vocab
         ann_id = self.ids[index]
-        caption = coco.anns[ann_id]['caption']
+        try:
+            caption = coco.anns[ann_id]['caption']
+        except:
+            print('err:', ann_id)
         img_id = coco.anns[ann_id]['image_id']
         path = coco.loadImgs(img_id)[0]['file_name']
 
